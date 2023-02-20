@@ -1,49 +1,47 @@
-int dirPin = 12;
-int pwmPin = 3;
-int brakePin = 9;
+// Выводы, подключенные к датчику
+#define sensorPower 7 
+#define powerSensor 8
+#define sensorPin A0
+#define pinSensor A5
 
+//рэле
+int RELAY_ON = 10;
 
+void setup() 
+{
+  Serial.begin(9600);
 
+  pinMode(sensorPower, OUTPUT);
+  digitalWrite(sensorPower, HIGH);
 
-bool directionState;
+  pinMode(RELAY_ON, OUTPUT);
+  digitalWrite(RELAY_ON, LOW);
 
-void setup() {
-  
-//define pins
-pinMode(directionPin, OUTPUT);
-pinMode(pwmPin, OUTPUT);
-pinMode(brakePin, OUTPUT);
-
+  pinMode(powerSensor, OUTPUT);
+  digitalWrite(powerSensor, HIGH);
 }
 
-void loop() {
 
-//change direction every loop()
-directionState = !directionState;
+void loop() 
+{
+  int level = analogRead(sensorPin);
+  int vs = analogRead(pinSensor);
 
-//write a low state to the direction pin (13)
-if(directionState == false){
-  digitalWrite(directionPin, LOW);
-}
 
-//write a high state to the direction pin (13)
-else{
-  digitalWrite(directionPin, HIGH);
-}
+  Serial.print("Water level:");
+  Serial.print(level);
+  Serial.print(" Humidity:");
+  Serial.println(vs);
 
-//release breaks
-digitalWrite(brakePin, LOW);
 
-//set work duty for the motor
-analogWrite(pwmPin, 30);
 
-delay(2000);
-
-//activate breaks
-digitalWrite(brakePin, HIGH);
-
-//set work duty for the motor to 0 (off)
-analogWrite(pwmPin, 0);
-
-delay(2000);
-}
+  if ((level == 0) || (vs > 570) || ((vs > 350) && (vs < 570))) 
+  {
+    digitalWrite(RELAY_ON, LOW);
+  }
+    else if ((vs < 350) && (level > 0)) 
+  {
+    digitalWrite(RELAY_ON, HIGH);
+  }
+  delay(5000);
+  }
